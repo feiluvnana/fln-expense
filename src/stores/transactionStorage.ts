@@ -45,14 +45,49 @@ export function getInitialSeedData(): Transaction[] {
 export function loadStoredTransactions(): Transaction[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return getInitialSeedData()
+    if (!raw) return []
     const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return getInitialSeedData()
-    const list = parsed.map(deserializeTx).filter((x): x is Transaction => x !== null)
-    return list.length ? list : getInitialSeedData()
-  } catch { return getInitialSeedData() }
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(deserializeTx).filter((x): x is Transaction => x !== null)
+  } catch {
+    return []
+  }
 }
 
 export function persistTransactions(list: Transaction[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list.map(serializeTx))) } catch (err) { console.error(err) }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list.map(serializeTx)))
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+export function clearStoredTransactions() {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+export function exportTransactionsToJson(list: Transaction[]): string {
+  const data = {
+    appName: 'FLN Expense',
+    version: '1.0.0',
+    exportedAt: new Date().toISOString(),
+    transactions: list.map(serializeTx),
+  }
+  return JSON.stringify(data, null, 2)
+}
+
+export function parseTransactionsFromJson(jsonString: string): Transaction[] | null {
+  try {
+    const parsed = JSON.parse(jsonString)
+    const listRaw = Array.isArray(parsed) ? parsed : parsed.transactions
+    if (!Array.isArray(listRaw)) return null
+    const txs = listRaw.map(deserializeTx).filter((x): x is Transaction => x !== null)
+    return txs
+  } catch {
+    return null
+  }
 }

@@ -1,0 +1,93 @@
+import type { Transaction } from '@/types/transaction'
+import { deserializeTx } from '@/stores/transactionStorage'
+
+export const RAW_SAMPLE_DATA = [
+  {
+    id: "tx_seed_001",
+    amount: { minorUnits: "35000000", currencyCode: "VND" },
+    category: { type: "income", name: "salary_and_wages", subcategory: "base_salary" },
+    timestamp: "2026-09-01T08:30:00.000Z"
+  },
+  {
+    id: "tx_seed_002",
+    amount: { minorUnits: "5000000", currencyCode: "VND" },
+    category: { type: "income", name: "business_and_freelance", subcategory: "client_projects" },
+    timestamp: "2026-09-01T15:00:00.000Z"
+  },
+  {
+    id: "tx_seed_003",
+    amount: { minorUnits: "1000000", currencyCode: "VND" },
+    category: { type: "income", name: "debt_and_loans", subcategory: "debt_collection" },
+    timestamp: "2026-09-02T10:15:00.000Z"
+  },
+  {
+    id: "tx_seed_004",
+    amount: { minorUnits: "2000000", currencyCode: "VND" },
+    category: { type: "expense", name: "loans_and_debts", subcategory: "lending" },
+    timestamp: "2026-09-02T11:00:00.000Z"
+  },
+  {
+    id: "tx_seed_005",
+    amount: { minorUnits: "1500000", currencyCode: "VND" },
+    category: { type: "expense", name: "loans_and_debts", subcategory: "debt_repayment" },
+    timestamp: "2026-09-02T14:30:00.000Z"
+  },
+  {
+    id: "tx_seed_006",
+    amount: { minorUnits: "320000", currencyCode: "VND" },
+    category: { type: "expense", name: "pet_care", subcategory: "pet_food" },
+    timestamp: "2026-09-02T16:45:00.000Z"
+  },
+  {
+    id: "tx_seed_007",
+    amount: { minorUnits: "180000", currencyCode: "VND" },
+    category: { type: "expense", name: "pet_care", subcategory: "pet_supplies" },
+    timestamp: "2026-09-02T17:20:00.000Z"
+  },
+  {
+    id: "tx_seed_008",
+    amount: { minorUnits: "450000", currencyCode: "VND" },
+    category: { type: "expense", name: "food_and_dining", subcategory: "groceries" },
+    timestamp: "2026-09-03T09:10:00.000Z"
+  },
+  {
+    id: "tx_seed_009",
+    amount: { minorUnits: "65000", currencyCode: "VND" },
+    category: { type: "expense", name: "food_and_dining", subcategory: "coffee_tea" },
+    timestamp: "2026-09-03T10:00:00.000Z"
+  },
+  {
+    id: "tx_seed_010",
+    amount: { minorUnits: "100000", currencyCode: "VND" },
+    category: { type: "expense", name: "transportation", subcategory: "fuel_gas" },
+    timestamp: "2026-09-03T11:30:00.000Z"
+  },
+  {
+    id: "tx_seed_011",
+    amount: { minorUnits: "620000", currencyCode: "VND" },
+    category: { type: "expense", name: "utilities", subcategory: "electricity" },
+    timestamp: "2026-09-03T13:00:00.000Z"
+  },
+  {
+    id: "tx_seed_012",
+    amount: { minorUnits: "4500", currencyCode: "JPY" },
+    category: { type: "expense", name: "shopping", subcategory: "clothing_shoes" },
+    timestamp: "2026-09-01T19:00:00.000Z"
+  },
+  {
+    id: "tx_seed_013",
+    amount: { minorUnits: "1200", currencyCode: "JPY" },
+    category: { type: "expense", name: "food_and_dining", subcategory: "restaurants" },
+    timestamp: "2026-09-02T12:30:00.000Z"
+  },
+  {
+    id: "tx_seed_014",
+    amount: { minorUnits: "1599", currencyCode: "USD" },
+    category: { type: "expense", name: "entertainment", subcategory: "movies_streaming" },
+    timestamp: "2026-09-01T20:00:00.000Z"
+  }
+]
+
+export function getSampleTransactions(): Transaction[] {
+  return RAW_SAMPLE_DATA.map(deserializeTx).filter((x): x is Transaction => x !== null)
+}

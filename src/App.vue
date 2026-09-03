@@ -7,6 +7,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import MobileBottomNav from '@/components/MobileBottomNav.vue'
 import TransactionModal from '@/components/TransactionModal.vue'
+import DataManagementModal from '@/components/DataManagementModal.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import AllTransactionsView from '@/views/AllTransactionsView.vue'
 
@@ -14,6 +15,7 @@ const LOCALE_KEY = 'fln_locale'
 const locale = ref<Locale>(DEFAULT_LOCALE)
 const currentView = ref<'dashboard' | 'all'>('dashboard')
 const isModalOpen = ref(false)
+const isDataModalOpen = ref(false)
 const editingTx = ref<Transaction | null>(null)
 
 const store = useExpenseStore()
@@ -57,6 +59,7 @@ function handleSave(data: TxPayload, id?: string) {
       :current-view="currentView"
       @navigate="currentView = $event"
       @open-add-modal="openAddModal"
+      @open-data-modal="isDataModalOpen = true"
       @change-locale="changeLocale"
     />
 
@@ -66,6 +69,7 @@ function handleSave(data: TxPayload, id?: string) {
         :locale="locale"
         @change-locale="changeLocale"
         @open-add-modal="openAddModal"
+        @open-data-modal="isDataModalOpen = true"
       />
 
       <!-- Main Scrollable Content Area -->
@@ -79,6 +83,7 @@ function handleSave(data: TxPayload, id?: string) {
             @edit="openEditModal"
             @delete="store.deleteTransaction"
             @open-add-modal="openAddModal"
+            @open-data-modal="isDataModalOpen = true"
           />
           <AllTransactionsView
             v-else
@@ -108,6 +113,13 @@ function handleSave(data: TxPayload, id?: string) {
       :editing-tx="editingTx"
       @close="isModalOpen = false"
       @save="handleSave"
+    />
+
+    <!-- Data Management / Import & Export Sheet Modal -->
+    <DataManagementModal
+      :is-open="isDataModalOpen"
+      :locale="locale"
+      @close="isDataModalOpen = false"
     />
   </div>
 </template>

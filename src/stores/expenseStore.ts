@@ -47,6 +47,26 @@ export const useExpenseStore = defineStore('expenses', () => {
     persist()
   }
 
+  function clearAllTransactions() {
+    transactions.value = []
+    persist()
+  }
+
+  function importTransactions(newTxs: Transaction[], mode: 'replace' | 'merge' = 'replace') {
+    if (mode === 'replace') {
+      transactions.value = [...newTxs]
+    } else {
+      const existingIds = new Set(transactions.value.map((t) => t.id))
+      const deduplicated = newTxs.filter((t) => !existingIds.has(t.id))
+      transactions.value = [...deduplicated, ...transactions.value]
+    }
+    persist()
+  }
+
+  function loadSampleData(sampleTxs: Transaction[]) {
+    importTransactions(sampleTxs, 'replace')
+  }
+
   const sortedTransactions = computed(() => {
     return [...transactions.value].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -110,5 +130,8 @@ export const useExpenseStore = defineStore('expenses', () => {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    clearAllTransactions,
+    importTransactions,
+    loadSampleData,
   }
 })

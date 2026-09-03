@@ -128,6 +128,24 @@ const pixelSize = computed(() => (typeof props.size === 'number' ? `${props.size
       <polyline points="20 6 9 17 4 12" />
     </g>
 
+    <g v-else-if="name === 'download'">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </g>
+
+    <g v-else-if="name === 'upload'">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </g>
+
+    <g v-else-if="name === 'database' || name === 'backup'">
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    </g>
+
     <!-- Categories: Expense -->
     <g v-else-if="name === 'food_and_dining'">
       <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
@@ -153,6 +171,24 @@ const pixelSize = computed(() => (typeof props.size === 'number' ? `${props.size
 
     <g v-else-if="name === 'utilities'">
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </g>
+
+    <g v-else-if="name === 'loans_and_debts'">
+      <!-- Handshake / lending icon -->
+      <path d="M16 3h5v5" />
+      <path d="M4 20L21 3" />
+      <path d="M21 16v5h-5" />
+      <path d="M15 15l6 6" />
+      <path d="M4 4l5 5" />
+    </g>
+
+    <g v-else-if="name === 'pet_care'">
+      <!-- Cute cat paw icon -->
+      <ellipse cx="12" cy="15" rx="4" ry="3.5" />
+      <circle cx="7" cy="9.5" r="1.8" />
+      <circle cx="10.5" cy="7" r="1.8" />
+      <circle cx="13.5" cy="7" r="1.8" />
+      <circle cx="17" cy="9.5" r="1.8" />
     </g>
 
     <g v-else-if="name === 'entertainment'">
@@ -202,6 +238,13 @@ const pixelSize = computed(() => (typeof props.size === 'number' ? `${props.size
     <g v-else-if="name === 'investments'">
       <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
       <polyline points="17 6 23 6 23 12" />
+    </g>
+
+    <g v-else-if="name === 'debt_and_loans'">
+      <!-- Debt recovery / money returning -->
+      <path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
     </g>
 
     <g v-else-if="name === 'gifts_and_grants'">

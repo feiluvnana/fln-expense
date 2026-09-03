@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Chart, type ChartConfiguration } from 'chart.js'
-import type { Transaction } from '@/types/transaction'
+import type { Transaction, SupportedCurrencyCode } from '@/types/transaction'
 import { t, type Locale } from '@/locales/i18n'
 import {
   getCategoryChartConfig,
+  getSubcategoryChartConfig,
   getComparisonChartConfig,
   getCurrencyChartConfig,
 } from '@/utils/chartConfig'
@@ -15,10 +16,19 @@ const props = defineProps<{
   locale: Locale
 }>()
 
-type Mode = 'category' | 'comparison' | 'currency'
+type Mode = 'category' | 'subcategory' | 'comparison' | 'currency'
 const mode = ref<Mode>('category')
+const selectedCurrency = ref<string>('all')
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
+
+const activeCurrencies = computed<SupportedCurrencyCode[]>(() => {
+  const set = new Set<SupportedCurrencyCode>()
+  for (const tx of props.transactions) {
+    set.add(tx.amount.toJSON().currency.code as SupportedCurrencyCode)
+  }
+  return Array.from(set)
+})
 
 function renderChart() {
   if (!canvasRef.value) return
@@ -26,7 +36,9 @@ function renderChart() {
 
   let cfg: ChartConfiguration
   if (mode.value === 'category') {
-    cfg = getCategoryChartConfig(props.transactions, props.locale)
+    cfg = getCategoryChartConfig(props.transactions, props.locale, selectedCurrency.value)
+  } else if (mode.value === 'subcategory') {
+    cfg = getSubcategoryChartConfig(props.transactions, props.locale, selectedCurrency.value)
   } else if (mode.value === 'comparison') {
     cfg = getComparisonChartConfig(props.transactions, props.locale)
   } else {
@@ -42,7 +54,7 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  [mode, () => props.transactions, () => props.locale],
+  [mode, selectedCurrency, () => props.transactions, () => props.locale],
   () => renderChart(),
   { deep: true },
 )
@@ -68,6 +80,15 @@ watch(
         <button
           type="button"
           class="mode-btn"
+          :class="{ active: mode === 'subcategory' }"
+          @click="mode = 'subcategory'"
+        >
+          <AppIcon name="filter" :size="13" stroke-width="2.2" />
+          <span>{{ t('modeSubcategory', locale) }}</span>
+        </button>
+        <button
+          type="button"
+          class="mode-btn"
           :class="{ active: mode === 'comparison' }"
           @click="mode = 'comparison'"
         >
@@ -82,6 +103,34 @@ watch(
         >
           <AppIcon name="receipt" :size="13" stroke-width="2.2" />
           <span>{{ t('modeCurrency', locale) }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Currency Filter Pills (Shown when in Category or Subcategory breakdown with multiple currencies) -->
+    <div
+      v-if="(mode === 'category' || mode === 'subcategory') && activeCurrencies.length > 1"
+      class="chart-currency-filter"
+    >
+      <span class="curr-filter-label">{{ t('filterCurrency', locale) }}:</span>
+      <div class="curr-filter-pills">
+        <button
+          type="button"
+          class="curr-filter-pill"
+          :class="{ active: selectedCurrency === 'all' }"
+          @click="selectedCurrency = 'all'"
+        >
+          {{ t('allCurrencies', locale) }}
+        </button>
+        <button
+          v-for="curr in activeCurrencies"
+          :key="'chart-curr-' + curr"
+          type="button"
+          class="curr-filter-pill tabular-nums"
+          :class="{ active: selectedCurrency === curr }"
+          @click="selectedCurrency = curr"
+        >
+          {{ curr }}
         </button>
       </div>
     </div>
@@ -146,6 +195,51 @@ watch(
   background: #ffffff;
   color: var(--primary);
   box-shadow: 0 1px 3px rgba(58, 41, 30, 0.08);
+}
+
+.chart-currency-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0;
+}
+
+.curr-filter-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.curr-filter-pills {
+  display: flex;
+  background: var(--surface-warm);
+  border: 1px solid var(--border);
+  padding: 0.15rem;
+  border-radius: var(--radius-pill);
+  gap: 0.15rem;
+}
+
+.curr-filter-pill {
+  border: none;
+  background: transparent;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.curr-filter-pill:hover {
+  color: var(--text);
+}
+
+.curr-filter-pill.active {
+  background: #ffffff;
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(58, 41, 30, 0.08);
 }
 
 .chart-container {

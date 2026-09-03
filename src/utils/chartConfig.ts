@@ -1,6 +1,6 @@
 import { Chart, registerables, type ChartConfiguration } from 'chart.js'
 import type { Transaction } from '@/types/transaction'
-import { t, tCategory, type Locale } from '@/locales/i18n'
+import { t, tCategory, tSubcategory, type Locale } from '@/locales/i18n'
 import { getDineroDecimalNumber } from './dineroHelpers'
 
 Chart.register(...registerables)
@@ -16,6 +16,9 @@ const FELINE_PALETTE = [
   '#F43F5E', // Rose
   '#0D9488', // Sky Teal
   '#78716C', // Warm Slate
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#14B8A6', // Teal
 ]
 
 const COMMON_TOOLTIP = {
@@ -30,13 +33,17 @@ const COMMON_TOOLTIP = {
 export function getCategoryChartConfig(
   txs: Transaction[],
   locale: Locale,
+  currencyFilter?: string,
 ): ChartConfiguration<'doughnut'> {
+  let filtered = txs.filter((t) => t.category.type === 'expense')
+  if (currencyFilter && currencyFilter !== 'all') {
+    filtered = filtered.filter((t) => t.amount.toJSON().currency.code === currencyFilter)
+  }
+
   const map = new Map<string, number>()
-  for (const tx of txs) {
-    if (tx.category.type === 'expense') {
-      const v = getDineroDecimalNumber(tx.amount)
-      map.set(tx.category.name, (map.get(tx.category.name) || 0) + v)
-    }
+  for (const tx of filtered) {
+    const v = getDineroDecimalNumber(tx.amount)
+    map.set(tx.category.name, (map.get(tx.category.name) || 0) + v)
   }
 
   const labels = Array.from(map.keys()).map((k) => tCategory(k, locale))
@@ -71,6 +78,72 @@ export function getCategoryChartConfig(
             font: { family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', size: 11 },
             color: '#574B44',
             padding: 14,
+          },
+        },
+        tooltip: COMMON_TOOLTIP,
+      },
+    },
+  }
+}
+
+export function getSubcategoryChartConfig(
+  txs: Transaction[],
+  locale: Locale,
+  currencyFilter?: string,
+): ChartConfiguration<'doughnut'> {
+  let filtered = txs.filter((t) => t.category.type === 'expense')
+  if (currencyFilter && currencyFilter !== 'all') {
+    filtered = filtered.filter((t) => t.amount.toJSON().currency.code === currencyFilter)
+  }
+
+  const map = new Map<string, { total: number; parentCat: string }>()
+  for (const tx of filtered) {
+    const sub = tx.category.subcategory
+    const v = getDineroDecimalNumber(tx.amount)
+    const existing = map.get(sub)
+    if (existing) {
+      existing.total += v
+    } else {
+      map.set(sub, { total: v, parentCat: tx.category.name })
+    }
+  }
+
+  const keys = Array.from(map.keys())
+  const labels = keys.map((k) => {
+    const item = map.get(k)!
+    return `${tSubcategory(k, locale)} (${tCategory(item.parentCat, locale)})`
+  })
+  const data = keys.map((k) => map.get(k)!.total)
+
+  return {
+    type: 'doughnut',
+    data: {
+      labels: labels.length ? labels : [t('emptyState', locale)],
+      datasets: [
+        {
+          data: data.length ? data : [1],
+          backgroundColor: labels.length ? FELINE_PALETTE : ['#E7DDD3'],
+          borderWidth: 2,
+          borderColor: '#FFFFFF',
+          hoverOffset: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '64%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 10,
+            boxHeight: 10,
+            usePointStyle: true,
+            pointStyle: 'circle',
+            font: { family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', size: 11 },
+            color: '#574B44',
+            padding: 12,
           },
         },
         tooltip: COMMON_TOOLTIP,

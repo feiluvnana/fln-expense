@@ -13,14 +13,11 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'navigate', view: 'dashboard' | 'all'): void
   (e: 'open-add-modal'): void
+  (e: 'open-data-modal'): void
   (e: 'change-locale', loc: Locale): void
 }>()
 
 const store = useExpenseStore()
-
-function onImport(l: Locale) {
-  alert(t('importNoop', l))
-}
 </script>
 
 <template>
@@ -88,9 +85,9 @@ function onImport(l: Locale) {
 
     <!-- Footer Controls -->
     <div class="sidebar-footer">
-      <button type="button" class="btn-sidebar-subtle" @click="onImport(locale)">
-        <AppIcon name="import" :size="16" stroke-width="2" />
-        <span>{{ t('importTx', locale) }}</span>
+      <button type="button" class="btn-sidebar-subtle" @click="emit('open-data-modal')">
+        <AppIcon name="database" :size="16" stroke-width="2" />
+        <span>{{ t('dataManagement', locale) }}</span>
       </button>
 
       <div class="lang-switch-container">

@@ -2,6 +2,8 @@
 import { t, type Locale } from '@/locales/i18n'
 import CatMascot from '@/components/CatMascot.vue'
 
+import AppIcon from '@/components/icons/AppIcon.vue'
+
 defineProps<{
   locale: Locale
 }>()
@@ -9,6 +11,7 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'change-locale', loc: Locale): void
   (e: 'open-add-modal'): void
+  (e: 'open-data-modal'): void
 }>()
 </script>
 
@@ -21,8 +24,18 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <!-- Quick Language Switcher on Mobile Top -->
+    <!-- Quick Language Switcher & Data Management on Mobile Top -->
     <div class="header-actions">
+      <button
+        type="button"
+        class="btn-data-modal"
+        :aria-label="t('dataManagement', locale)"
+        :title="t('dataManagement', locale)"
+        @click="emit('open-data-modal')"
+      >
+        <AppIcon name="database" :size="16" stroke-width="2.2" />
+      </button>
+
       <div class="lang-toggle-pills">
         <button
           type="button"
@@ -83,6 +96,32 @@ const emit = defineEmits<{
   color: var(--text);
   letter-spacing: -0.01em;
   line-height: 1.2;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-data-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-warm);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-data-modal:hover {
+  background: var(--surface-hover);
+  color: var(--primary);
+  border-color: var(--border-focus);
 }
 
 .lang-toggle-pills {
