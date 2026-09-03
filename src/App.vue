@@ -10,10 +10,11 @@ import TransactionModal from '@/components/TransactionModal.vue'
 import DataManagementModal from '@/components/DataManagementModal.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import AllTransactionsView from '@/views/AllTransactionsView.vue'
+import RecurringView from '@/views/RecurringView.vue'
 
 const LOCALE_KEY = 'fln_locale'
 const locale = ref<Locale>(DEFAULT_LOCALE)
-const currentView = ref<'dashboard' | 'all'>('dashboard')
+const currentView = ref<'dashboard' | 'all' | 'recurring'>('dashboard')
 const isModalOpen = ref(false)
 const isDataModalOpen = ref(false)
 const editingTx = ref<Transaction | null>(null)
@@ -85,6 +86,12 @@ function handleSave(data: TxPayload, id?: string) {
             @open-add-modal="openAddModal"
             @open-data-modal="isDataModalOpen = true"
           />
+          <RecurringView
+            v-else-if="currentView === 'recurring'"
+            :key="'recurring-' + locale"
+            :locale="locale"
+            @navigate="currentView = $event"
+          />
           <AllTransactionsView
             v-else
             :key="'all-' + locale"
@@ -103,6 +110,7 @@ function handleSave(data: TxPayload, id?: string) {
         :locale="locale"
         @navigate="currentView = $event"
         @open-add-modal="openAddModal"
+        @open-data-modal="isDataModalOpen = true"
       />
     </div>
 

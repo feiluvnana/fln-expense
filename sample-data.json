@@ -1,4 +1,8 @@
-[
+{
+  "appName": "FLN Expense",
+  "version": "1.0.0",
+  "exportedAt": "2026-09-03T18:00:00.000Z",
+  "transactions": [
   {
     "id": "tx_seed_001",
     "amount": { "minorUnits": "35000000", "currencyCode": "VND" },
@@ -83,4 +87,70 @@
     "category": { "type": "expense", "name": "entertainment", "subcategory": "movies_streaming" },
     "timestamp": "2026-09-01T20:00:00.000Z"
   }
-]
+  ],
+  "recurring": [
+    {
+      "id": "rec_seed_001",
+      "name": "Lương cố định công ty",
+      "type": "income",
+      "amount": { "minorUnits": "35000000", "currencyCode": "VND" },
+      "category": { "type": "income", "name": "salary_and_wages", "subcategory": "base_salary" },
+      "frequency": "monthly",
+      "dueDay": 5,
+      "active": true,
+      "notes": "Chuyển khoản ngày 5 hàng tháng"
+    },
+    {
+      "id": "rec_seed_002",
+      "name": "Tiền thuê căn hộ / phòng trọ",
+      "type": "expense",
+      "amount": { "minorUnits": "4500000", "currencyCode": "VND" },
+      "category": { "type": "expense", "name": "housing", "subcategory": "rent" },
+      "frequency": "monthly",
+      "dueDay": 1,
+      "active": true,
+      "notes": "Thanh toán đầu tháng"
+    },
+    {
+      "id": "rec_seed_003",
+      "name": "Internet Wifi cáp quang",
+      "type": "expense",
+      "amount": { "minorUnits": "250000", "currencyCode": "VND" },
+      "category": { "type": "expense", "name": "utilities", "subcategory": "internet" },
+      "frequency": "monthly",
+      "dueDay": 15,
+      "active": true
+    },
+    {
+      "id": "rec_seed_004",
+      "name": "Gói xem phim Netflix / Spotify",
+      "type": "expense",
+      "amount": { "minorUnits": "1599", "currencyCode": "USD" },
+      "category": { "type": "expense", "name": "entertainment", "subcategory": "movies_streaming" },
+      "frequency": "monthly",
+      "dueDay": 20,
+      "active": true
+    },
+    {
+      "id": "rec_seed_005",
+      "name": "Hạt & pate dinh dưỡng Bé Dứa",
+      "type": "expense",
+      "amount": { "minorUnits": "500000", "currencyCode": "VND" },
+      "category": { "type": "expense", "name": "pet_care", "subcategory": "pet_food" },
+      "frequency": "monthly",
+      "dueDay": 10,
+      "active": true,
+      "notes": "Thức ăn ngon cho mèo cưng"
+    },
+    {
+      "id": "rec_seed_006",
+      "name": "Gói tập Gym / Yoga định kỳ",
+      "type": "expense",
+      "amount": { "minorUnits": "600000", "currencyCode": "VND" },
+      "category": { "type": "expense", "name": "healthcare", "subcategory": "health_fitness" },
+      "frequency": "monthly",
+      "dueDay": 8,
+      "active": true
+    }
+  ]
+}

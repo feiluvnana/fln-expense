@@ -32,7 +32,8 @@ const filteredTransactions = computed(() => {
       const cat = tCategory(tx.category.name, props.locale).toLowerCase()
       const sub = tSubcategory(tx.category.subcategory, props.locale).toLowerCase()
       const id = tx.id.toLowerCase()
-      return cat.includes(q) || sub.includes(q) || id.includes(q)
+      const note = (tx.note || '').toLowerCase()
+      return cat.includes(q) || sub.includes(q) || id.includes(q) || note.includes(q)
     })
   }
   return list
@@ -61,7 +62,7 @@ const groupedTransactions = computed(() => {
       </div>
 
       <!-- Type Filter Segmented Control -->
-      <div class="filter-pills" role="radiogroup">
+      <div v-horizontal-scroll class="filter-pills" role="radiogroup">
         <button
           type="button"
           class="filter-btn"
@@ -157,6 +158,7 @@ const groupedTransactions = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
+  min-width: 0;
 }
 
 .view-header {
@@ -165,6 +167,7 @@ const groupedTransactions = computed(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .header-left {
@@ -208,6 +211,14 @@ const groupedTransactions = computed(() => {
   padding: 0.2rem;
   border-radius: var(--radius-pill);
   gap: 0.2rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-btn {
@@ -219,6 +230,8 @@ const groupedTransactions = computed(() => {
   font-weight: 600;
   cursor: pointer;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -302,12 +315,14 @@ const groupedTransactions = computed(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0 0.25rem;
+  min-width: 0;
 }
 
 .date-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-secondary);

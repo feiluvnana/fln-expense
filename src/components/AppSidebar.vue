@@ -7,11 +7,11 @@ import AppIcon from '@/components/icons/AppIcon.vue'
 
 defineProps<{
   locale: Locale
-  currentView: 'dashboard' | 'all'
+  currentView: 'dashboard' | 'all' | 'recurring'
 }>()
 
 const emit = defineEmits<{
-  (e: 'navigate', view: 'dashboard' | 'all'): void
+  (e: 'navigate', view: 'dashboard' | 'all' | 'recurring'): void
   (e: 'open-add-modal'): void
   (e: 'open-data-modal'): void
   (e: 'change-locale', loc: Locale): void
@@ -52,6 +52,16 @@ const store = useExpenseStore()
       <button
         type="button"
         class="nav-item"
+        :class="{ active: currentView === 'recurring' }"
+        @click="emit('navigate', 'recurring')"
+      >
+        <AppIcon name="repeat" :size="19" stroke-width="2" />
+        <span class="nav-text">{{ t('recurringTitle', locale) }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
         :class="{ active: currentView === 'all' }"
         @click="emit('navigate', 'all')"
       >
@@ -76,6 +86,7 @@ const store = useExpenseStore()
             v-if="store.netBalanceByCurrency[curr]"
             class="mini-balance-val tabular-nums"
             :class="store.netBalanceByCurrency[curr]!.isNegative ? 'text-expense' : 'text-income'"
+            :title="formatDineroAmount(store.netBalanceByCurrency[curr]!.val, locale)"
           >
             {{ formatDineroAmount(store.netBalanceByCurrency[curr]!.val, locale) }}
           </span>
@@ -139,6 +150,7 @@ const store = useExpenseStore()
   align-items: center;
   gap: 0.75rem;
 }
+
 
 .brand-info {
   display: flex;
@@ -230,13 +242,16 @@ const store = useExpenseStore()
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .mini-balance-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   font-size: 0.82rem;
+  min-width: 0;
 }
 
 .mini-curr-tag {
@@ -248,10 +263,18 @@ const store = useExpenseStore()
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .mini-balance-val {
   font-weight: 600;
+  font-size: clamp(0.72rem, 1vw, 0.82rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  text-align: right;
+  max-width: 100%;
 }
 
 /* Footer */

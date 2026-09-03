@@ -86,20 +86,20 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Hide all scrollbars globally across the app while preserving smooth scrolling */
+html,
+body,
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-::-webkit-scrollbar-thumb {
-  background: #e3d5c5;
-  border-radius: var(--radius-pill);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #cfbeab;
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 /* Custom Text Selection */
@@ -178,6 +178,14 @@ textarea {
 .tabular-nums {
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Ensure flex & grid containers never burst their bounds on long numbers */
+.card,
+.modal-sheet,
+.app-layout {
+  min-width: 0;
 }
 
 /* Buttons */

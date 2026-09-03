@@ -9,7 +9,7 @@ export const CATEGORY_IDENTIFIERS: Record<TransactionType, Record<string, string
     loans_and_debts: ['lending', 'debt_repayment', 'debt_interest'],
     entertainment: ['movies_streaming', 'games', 'concerts_events', 'hobbies_books'],
     shopping: ['clothing_shoes', 'electronics', 'home_kitchen', 'personal_care'],
-    healthcare: ['doctor_clinic', 'pharmacy_medicine', 'dental', 'health_insurance'],
+    healthcare: ['doctor_clinic', 'pharmacy_medicine', 'dental', 'health_insurance', 'health_fitness'],
     education: ['courses_training', 'books_materials', 'tuition'],
     pet_care: ['pet_food', 'pet_vet', 'pet_supplies'],
     other_expense: ['bank_fees', 'taxes', 'donations', 'miscellaneous'],

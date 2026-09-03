@@ -36,6 +36,10 @@ function onDelete() {
         <span class="divider-dot" aria-hidden="true">•</span>
         <span class="subcategory-name">{{ tSubcategory(tx.category.subcategory, locale) }}</span>
       </div>
+      <div v-if="tx.note" class="tx-note-line">
+        <AppIcon name="note" :size="12" stroke-width="2" class="tx-note-icon" />
+        <span class="tx-note-text" :title="tx.note">{{ tx.note }}</span>
+      </div>
       <div class="tx-meta-line">
         <span class="tx-time">
           <AppIcon name="clock" :size="12" stroke-width="2" />
@@ -50,6 +54,7 @@ function onDelete() {
       <div
         class="tx-amount tabular-nums"
         :class="tx.category.type === 'income' ? 'text-income' : 'text-expense'"
+        :title="formatDineroAmount(tx.amount, locale)"
       >
         <span class="amount-sign">{{ tx.category.type === 'income' ? '+' : '-' }}</span>
         {{ formatDineroAmount(tx.amount, locale) }}
@@ -162,6 +167,26 @@ function onDelete() {
   text-overflow: ellipsis;
 }
 
+.tx-note-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.tx-note-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.tx-note-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .tx-meta-line {
   display: flex;
   align-items: center;
@@ -193,13 +218,18 @@ function onDelete() {
   align-items: flex-end;
   gap: 0.35rem;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 52%;
 }
 
 .tx-amount {
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 2.8vw, 1rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .amount-sign {

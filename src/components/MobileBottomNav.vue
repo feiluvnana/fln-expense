@@ -3,13 +3,14 @@ import { t, type Locale } from '@/locales/i18n'
 import AppIcon from '@/components/icons/AppIcon.vue'
 
 defineProps<{
-  currentView: 'dashboard' | 'all'
+  currentView: 'dashboard' | 'all' | 'recurring'
   locale: Locale
 }>()
 
 const emit = defineEmits<{
-  (e: 'navigate', view: 'dashboard' | 'all'): void
+  (e: 'navigate', view: 'dashboard' | 'all' | 'recurring'): void
   (e: 'open-add-modal'): void
+  (e: 'open-data-modal'): void
 }>()
 </script>
 
@@ -22,9 +23,21 @@ const emit = defineEmits<{
       @click="emit('navigate', 'dashboard')"
     >
       <div class="icon-wrap">
-        <AppIcon name="dashboard" :size="20" stroke-width="2" />
+        <AppIcon name="dashboard" :size="19" stroke-width="2" />
       </div>
       <span class="tab-label">{{ t('dashboard', locale) }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="nav-tab"
+      :class="{ active: currentView === 'recurring' }"
+      @click="emit('navigate', 'recurring')"
+    >
+      <div class="icon-wrap">
+        <AppIcon name="repeat" :size="19" stroke-width="2" />
+      </div>
+      <span class="tab-label">{{ t('recurring', locale) }}</span>
     </button>
 
     <!-- Center Thumb Quick-Add FAB -->
@@ -46,9 +59,21 @@ const emit = defineEmits<{
       @click="emit('navigate', 'all')"
     >
       <div class="icon-wrap">
-        <AppIcon name="transactions" :size="20" stroke-width="2" />
+        <AppIcon name="transactions" :size="19" stroke-width="2" />
       </div>
       <span class="tab-label">{{ t('allTransactions', locale) }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="nav-tab"
+      :aria-label="t('dataManagement', locale)"
+      @click="emit('open-data-modal')"
+    >
+      <div class="icon-wrap">
+        <AppIcon name="database" :size="19" stroke-width="2" />
+      </div>
+      <span class="tab-label">{{ t('navData', locale) }}</span>
     </button>
   </nav>
 </template>
@@ -66,7 +91,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0.35rem 1rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.35rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
   z-index: 50;
   box-shadow: 0 -4px 16px rgba(40, 33, 29, 0.06);
 }
@@ -85,12 +110,15 @@ const emit = defineEmits<{
   gap: 0.2rem;
   background: transparent;
   border: none;
-  padding: 0.35rem 0.5rem;
+  padding: 0.35rem 0.25rem;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s ease, transform 0.1s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.1s ease;
   min-height: 48px;
   justify-content: center;
+  min-width: 0;
 }
 
 .nav-tab:active {
@@ -142,7 +170,9 @@ const emit = defineEmits<{
   box-shadow: var(--shadow-float);
   cursor: pointer;
   transform: translateY(-8px);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .center-fab:active {

@@ -10,6 +10,7 @@ export interface TxPayload {
   amount: number
   currencyCode: SupportedCurrencyCode
   category: Category
+  note?: string
 }
 
 export const useExpenseStore = defineStore('expenses', () => {
@@ -25,6 +26,7 @@ export const useExpenseStore = defineStore('expenses', () => {
       amount: createDineroAmount(data.amount, data.currencyCode),
       category: data.category,
       timestamp: new Date().toISOString(),
+      note: data.note?.trim() || undefined,
     }
     transactions.value.unshift(newTx)
     persist()
@@ -38,6 +40,7 @@ export const useExpenseStore = defineStore('expenses', () => {
       ...transactions.value[idx]!,
       amount: createDineroAmount(data.amount, data.currencyCode),
       category: data.category,
+      note: data.note?.trim() || undefined,
     }
     persist()
   }

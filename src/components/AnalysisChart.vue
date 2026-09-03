@@ -146,6 +146,7 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .chart-header {
@@ -154,6 +155,8 @@ watch(
   align-items: center;
   flex-wrap: wrap;
   gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .chart-title {
@@ -170,6 +173,14 @@ watch(
   padding: 0.2rem;
   border-radius: var(--radius-pill);
   gap: 0.2rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mode-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .mode-btn {
@@ -184,6 +195,8 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -202,12 +215,21 @@ watch(
   align-items: center;
   gap: 0.5rem;
   padding: 0.1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chart-currency-filter::-webkit-scrollbar {
+  display: none;
 }
 
 .curr-filter-label {
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .curr-filter-pills {
@@ -217,6 +239,12 @@ watch(
   padding: 0.15rem;
   border-radius: var(--radius-pill);
   gap: 0.15rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.curr-filter-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .curr-filter-pill {
@@ -228,6 +256,8 @@ watch(
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.12s ease;
 }
 

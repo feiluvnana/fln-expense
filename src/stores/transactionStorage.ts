@@ -10,12 +10,19 @@ interface SerializedTx {
   amount: { minorUnits: string; currencyCode: SupportedCurrencyCode }
   category: Category
   timestamp: string
+  note?: string
 }
 
 export function serializeTx(tx: Transaction): SerializedTx {
   const s = tx.amount.toJSON()
   const code = (s.currency.code in SUPPORTED_CURRENCIES ? s.currency.code : 'VND') as SupportedCurrencyCode
-  return { id: tx.id, amount: { minorUnits: s.amount.toString(), currencyCode: code }, category: tx.category, timestamp: tx.timestamp }
+  return {
+    id: tx.id,
+    amount: { minorUnits: s.amount.toString(), currencyCode: code },
+    category: tx.category,
+    timestamp: tx.timestamp,
+    note: tx.note?.trim() || undefined,
+  }
 }
 
 export function deserializeTx(raw: Record<string, unknown>): Transaction | null {
@@ -28,6 +35,7 @@ export function deserializeTx(raw: Record<string, unknown>): Transaction | null 
       amount: dinero({ amount: BigInt(r.amount.minorUnits), currency: SUPPORTED_CURRENCIES[code] }),
       category: { type: r.category.type === 'income' ? 'income' : 'expense', name: r.category.name || 'other_expense', subcategory: r.category.subcategory || 'miscellaneous' },
       timestamp: r.timestamp || new Date().toISOString(),
+      note: typeof r.note === 'string' && r.note.trim() ? r.note.trim() : undefined,
     }
   } catch { return null }
 }
@@ -35,10 +43,10 @@ export function deserializeTx(raw: Record<string, unknown>): Transaction | null 
 export function getInitialSeedData(): Transaction[] {
   const now = Date.now()
   return [
-    { id: generateRandomId(), amount: createDineroAmount(120000, 'VND'), category: { type: 'expense', name: 'food_and_dining', subcategory: 'restaurants' }, timestamp: new Date(now - 7200000).toISOString() },
-    { id: generateRandomId(), amount: createDineroAmount(35000000, 'VND'), category: { type: 'income', name: 'salary_and_wages', subcategory: 'base_salary' }, timestamp: new Date(now - 86400000).toISOString() },
-    { id: generateRandomId(), amount: createDineroAmount(4500, 'JPY'), category: { type: 'expense', name: 'shopping', subcategory: 'clothing_shoes' }, timestamp: new Date(now - 172800000).toISOString() },
-    { id: generateRandomId(), amount: createDineroAmount(15.99, 'USD'), category: { type: 'expense', name: 'entertainment', subcategory: 'movies_streaming' }, timestamp: new Date(now - 259200000).toISOString() },
+    { id: generateRandomId(), amount: createDineroAmount(120000, 'VND'), category: { type: 'expense', name: 'food_and_dining', subcategory: 'restaurants' }, timestamp: new Date(now - 7200000).toISOString(), note: 'Bún chả trưa văn phòng' },
+    { id: generateRandomId(), amount: createDineroAmount(35000000, 'VND'), category: { type: 'income', name: 'salary_and_wages', subcategory: 'base_salary' }, timestamp: new Date(now - 86400000).toISOString(), note: 'Lương chuyển khoản' },
+    { id: generateRandomId(), amount: createDineroAmount(4500, 'JPY'), category: { type: 'expense', name: 'shopping', subcategory: 'clothing_shoes' }, timestamp: new Date(now - 172800000).toISOString(), note: 'Áo sơ mi Uniqlo' },
+    { id: generateRandomId(), amount: createDineroAmount(15.99, 'USD'), category: { type: 'expense', name: 'entertainment', subcategory: 'movies_streaming' }, timestamp: new Date(now - 259200000).toISOString(), note: 'Gói xem phim Netflix' },
   ]
 }
 

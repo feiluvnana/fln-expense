@@ -15,4 +15,5 @@ export interface Transaction<TAmount = bigint> {
   amount: Dinero<TAmount>
   category: Category
   timestamp: string
+  note?: string
 }

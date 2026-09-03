@@ -85,6 +85,7 @@ const emit = defineEmits<{
   gap: 0.65rem;
 }
 
+
 .brand-text {
   display: flex;
   flex-direction: column;

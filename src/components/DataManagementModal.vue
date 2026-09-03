@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { t, type Locale } from '@/locales/i18n'
+import type { Transaction } from '@/types/transaction'
+import type { RecurringItem } from '@/types/recurring'
 import { useExpenseStore } from '@/stores/expenseStore'
-import { exportTransactionsToJson, parseTransactionsFromJson } from '@/stores/transactionStorage'
-import { getSampleTransactions } from '@/utils/sampleData'
+import { useRecurringStore, serializeRecurringItem, deserializeRecurringItem } from '@/stores/recurringStore'
+import { serializeTx, deserializeTx } from '@/stores/transactionStorage'
+import { getSampleTransactions, getSampleRecurring } from '@/utils/sampleData'
 import AppIcon from '@/components/icons/AppIcon.vue'
 
 defineProps<{
@@ -16,6 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useExpenseStore()
+const recurringStore = useRecurringStore()
 
 const importMode = ref<'replace' | 'merge'>('replace')
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -32,7 +36,14 @@ function showFeedback(text: string, isError = false) {
 
 function handleExport(locale: Locale) {
   try {
-    const jsonStr = exportTransactionsToJson(store.transactions)
+    const backupData = {
+      appName: 'FLN Expense',
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      transactions: store.transactions.map(serializeTx),
+      recurring: recurringStore.items.map(serializeRecurringItem),
+    }
+    const jsonStr = JSON.stringify(backupData, null, 2)
     const blob = new Blob([jsonStr], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -51,7 +62,9 @@ function handleExport(locale: Locale) {
 
 function handleLoadSample(locale: Locale) {
   const sampleTxs = getSampleTransactions()
+  const sampleRec = getSampleRecurring()
   store.loadSampleData(sampleTxs)
+  recurringStore.loadSampleData(sampleRec)
   showFeedback(t('sampleLoaded', locale))
 }
 
@@ -64,12 +77,30 @@ function handleFileInputChange(e: Event, locale: Locale) {
   reader.onload = (event) => {
     try {
       const content = event.target?.result as string
-      const txs = parseTransactionsFromJson(content)
-      if (!txs || txs.length === 0) {
+      const parsed = JSON.parse(content)
+      const txRaw = Array.isArray(parsed) ? parsed : parsed?.transactions
+      const recRaw = Array.isArray(parsed) ? [] : parsed?.recurring
+
+      const txs = Array.isArray(txRaw)
+        ? (txRaw as Record<string, unknown>[]).map(deserializeTx).filter((x: Transaction | null): x is Transaction => x !== null)
+        : []
+      const recItems = Array.isArray(recRaw)
+        ? (recRaw as Record<string, unknown>[]).map(deserializeRecurringItem).filter((x: RecurringItem | null): x is RecurringItem => x !== null)
+        : []
+
+      // A backup holding only recurring items is still valid
+      if (txs.length === 0 && recItems.length === 0) {
         showFeedback(t('importError', locale), true)
         return
       }
-      store.importTransactions(txs, importMode.value)
+
+      if (txs.length > 0) {
+        store.importTransactions(txs, importMode.value)
+      }
+      if (recItems.length > 0) {
+        recurringStore.importRecurring(recItems, importMode.value)
+      }
+
       const successStr = t('importSuccess', locale).replace('{count}', String(txs.length))
       showFeedback(successStr)
       if (fileInputRef.value) fileInputRef.value.value = ''
@@ -83,6 +114,7 @@ function handleFileInputChange(e: Event, locale: Locale) {
 function handleClear(locale: Locale) {
   if (confirm(t('clearConfirm', locale))) {
     store.clearAllTransactions()
+    recurringStore.clearAllRecurring()
     showFeedback(t('dataCleared', locale))
   }
 }
@@ -91,41 +123,46 @@ function handleClear(locale: Locale) {
 <template>
   <div v-if="isOpen" class="modal-backdrop" @click.self="emit('close')">
     <div class="modal-sheet">
-      <!-- Mobile Pull Bar Handle -->
-      <div class="sheet-handle-bar" aria-hidden="true">
-        <span class="sheet-handle"></span>
-      </div>
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <div class="header-title-group">
-          <div class="icon-bubble">
-            <AppIcon name="database" :size="20" stroke-width="2.2" />
-          </div>
-          <h3 class="modal-title">{{ t('dataManagement', locale) }}</h3>
+      <!-- Pinned Header -->
+      <div class="modal-sheet-header">
+        <!-- Mobile Pull Bar Handle -->
+        <div class="sheet-handle-bar" aria-hidden="true">
+          <span class="sheet-handle"></span>
         </div>
-        <button
-          type="button"
-          class="btn-close-icon"
-          :aria-label="t('close', locale)"
-          @click="emit('close')"
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="header-title-group">
+            <div class="icon-bubble">
+              <AppIcon name="database" :size="20" stroke-width="2.2" />
+            </div>
+            <h3 class="modal-title">{{ t('dataManagement', locale) }}</h3>
+          </div>
+          <button
+            type="button"
+            class="btn-close-icon"
+            :aria-label="t('close', locale)"
+            @click="emit('close')"
+          >
+            <AppIcon name="close" :size="18" stroke-width="2.2" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Body with generous padding -->
+      <div class="modal-sheet-body">
+        <!-- Feedback Alert Banner -->
+        <div
+          v-if="feedbackMsg"
+          class="feedback-banner"
+          :class="feedbackMsg.isError ? 'banner-error' : 'banner-success'"
         >
-          <AppIcon name="close" :size="18" stroke-width="2.2" />
-        </button>
-      </div>
+          <AppIcon :name="feedbackMsg.isError ? 'close' : 'check'" :size="16" stroke-width="2.4" />
+          <span>{{ feedbackMsg.text }}</span>
+        </div>
 
-      <!-- Feedback Alert Banner -->
-      <div
-        v-if="feedbackMsg"
-        class="feedback-banner"
-        :class="feedbackMsg.isError ? 'banner-error' : 'banner-success'"
-      >
-        <AppIcon :name="feedbackMsg.isError ? 'close' : 'check'" :size="16" stroke-width="2.4" />
-        <span>{{ feedbackMsg.text }}</span>
-      </div>
-
-      <!-- Content Sections -->
-      <div class="management-sections">
+        <!-- Content Sections -->
+        <div class="management-sections">
         <!-- 1. Load Sample Data Card -->
         <div class="data-card sample-card">
           <div class="data-card-info">
@@ -157,7 +194,7 @@ function handleClear(locale: Locale) {
           <button
             type="button"
             class="btn-action-secondary"
-            :disabled="!store.transactions.length"
+            :disabled="!store.transactions.length && !recurringStore.items.length"
             @click="handleExport(locale)"
           >
             <AppIcon name="download" :size="15" stroke-width="2.2" />
@@ -220,13 +257,13 @@ function handleClear(locale: Locale) {
           <div class="data-card-info">
             <h4 class="card-title text-danger">{{ t('clearAllData', locale) }}</h4>
             <span class="danger-count">
-              {{ store.transactions.length }} {{ t('totalRecords', locale).toLowerCase() }}
+              {{ store.transactions.length + recurringStore.items.length }} {{ t('totalRecords', locale).toLowerCase() }}
             </span>
           </div>
           <button
             type="button"
             class="btn-danger"
-            :disabled="!store.transactions.length"
+            :disabled="!store.transactions.length && !recurringStore.items.length"
             @click="handleClear(locale)"
           >
             <AppIcon name="trash" :size="15" stroke-width="2.2" />
@@ -236,6 +273,7 @@ function handleClear(locale: Locale) {
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <style scoped>
@@ -268,15 +306,13 @@ function handleClear(locale: Locale) {
   background: var(--surface);
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 88vh;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 1.25rem 1.25rem 2rem;
   box-shadow: var(--shadow-modal);
   animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -287,7 +323,7 @@ function handleClear(locale: Locale) {
 @media (min-width: 640px) {
   .modal-sheet {
     border-radius: var(--radius-xl);
-    padding: 1.5rem;
+    max-height: 84vh;
     animation: scaleIn 0.18s ease-out;
   }
 }
@@ -295,6 +331,35 @@ function handleClear(locale: Locale) {
 @keyframes scaleIn {
   from { transform: scale(0.96); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+.modal-sheet-header {
+  padding: 0.85rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .modal-sheet-header {
+    padding: 1.1rem 1.5rem 0.85rem;
+  }
+}
+
+.modal-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.15rem 1.25rem calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 640px) {
+  .modal-sheet-body {
+    padding: 1.25rem 1.5rem 2rem;
+  }
 }
 
 .sheet-handle-bar {

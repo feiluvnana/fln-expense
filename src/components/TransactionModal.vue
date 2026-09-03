@@ -25,6 +25,7 @@ const availableSubs = computed(() => CATEGORY_IDENTIFIERS[type.value][selectedCa
 const selectedSub = ref(availableSubs.value[0] || 'groceries')
 const amount = ref<number | null>(null)
 const currency = ref<SupportedCurrencyCode>('VND')
+const note = ref('')
 
 const supportedCurrencies: SupportedCurrencyCode[] = ['VND', 'JPY', 'USD']
 
@@ -48,12 +49,14 @@ watch(
       selectedSub.value = props.editingTx.category.subcategory
       amount.value = Number(toDecimal(props.editingTx.amount))
       currency.value = props.editingTx.amount.toJSON().currency.code as SupportedCurrencyCode
+      note.value = props.editingTx.note || ''
     } else {
       type.value = 'expense'
       selectedCat.value = Object.keys(CATEGORY_IDENTIFIERS['expense'])[0] || 'food_and_dining'
       selectedSub.value = CATEGORY_IDENTIFIERS['expense'][selectedCat.value]?.[0] || 'groceries'
       amount.value = null
       currency.value = 'VND'
+      note.value = ''
     }
   },
 )
@@ -70,6 +73,7 @@ function onSubmit() {
         name: selectedCat.value,
         subcategory: selectedSub.value,
       },
+      note: note.value.trim() || undefined,
     },
     props.editingTx?.id,
   )
@@ -80,28 +84,30 @@ function onSubmit() {
 <template>
   <div v-if="isOpen" class="modal-backdrop" @click.self="emit('close')">
     <div class="modal-sheet">
-      <!-- Mobile Pull Bar Handle -->
-      <div class="sheet-handle-bar" aria-hidden="true">
-        <span class="sheet-handle"></span>
+      <!-- Pinned Header -->
+      <div class="modal-sheet-header">
+        <!-- Mobile Pull Bar Handle -->
+        <div class="sheet-handle-bar" aria-hidden="true">
+          <span class="sheet-handle"></span>
+        </div>
+
+        <div class="modal-header">
+          <h3 class="modal-title">
+            {{ editingTx ? t('editTx', locale) : t('addTx', locale) }}
+          </h3>
+          <button
+            type="button"
+            class="btn-close-icon"
+            :aria-label="t('cancel', locale)"
+            @click="emit('close')"
+          >
+            <AppIcon name="close" :size="18" stroke-width="2.2" />
+          </button>
+        </div>
       </div>
 
-      <!-- Header -->
-      <div class="modal-header">
-        <h3 class="modal-title">
-          {{ editingTx ? t('editTx', locale) : t('addTx', locale) }}
-        </h3>
-        <button
-          type="button"
-          class="btn-close-icon"
-          :aria-label="t('cancel', locale)"
-          @click="emit('close')"
-        >
-          <AppIcon name="close" :size="18" stroke-width="2.2" />
-        </button>
-      </div>
-
-      <!-- Form -->
-      <form @submit.prevent="onSubmit" class="modal-form">
+      <!-- Scrollable Form Body with generous padding -->
+      <form id="tx-modal-form" @submit.prevent="onSubmit" class="modal-sheet-body">
         <!-- Transaction Type Segmented Toggle -->
         <div class="type-segmented-control" role="radiogroup">
           <button
@@ -190,21 +196,36 @@ function onSubmit() {
           </div>
         </div>
 
-        <!-- Actions -->
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" @click="emit('close')">
-            {{ t('cancel', locale) }}
-          </button>
-          <button
-            type="submit"
-            class="btn-primary submit-btn"
-            :disabled="!amount || amount <= 0"
-          >
-            <AppIcon name="check" :size="16" stroke-width="2.5" />
-            <span>{{ editingTx ? t('save', locale) : t('create', locale) }}</span>
-          </button>
+        <!-- Note Input -->
+        <div class="form-section">
+          <label class="form-label" for="tx-note-input">{{ t('note', locale) }}</label>
+          <input
+            id="tx-note-input"
+            v-model="note"
+            type="text"
+            :placeholder="t('notePlaceholder', locale)"
+            class="text-input"
+            autocomplete="off"
+            maxlength="200"
+          />
         </div>
       </form>
+
+      <!-- Pinned Footer Actions -->
+      <div class="modal-sheet-footer">
+        <button type="button" class="btn-secondary" @click="emit('close')">
+          {{ t('cancel', locale) }}
+        </button>
+        <button
+          type="submit"
+          form="tx-modal-form"
+          class="btn-primary submit-btn"
+          :disabled="!amount || amount <= 0"
+        >
+          <AppIcon name="check" :size="16" stroke-width="2.5" />
+          <span>{{ editingTx ? t('save', locale) : t('create', locale) }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -239,15 +260,13 @@ function onSubmit() {
   background: var(--surface);
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 88vh;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 1.25rem 1.25rem 2rem;
   box-shadow: var(--shadow-modal);
   animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -258,7 +277,7 @@ function onSubmit() {
 @media (min-width: 640px) {
   .modal-sheet {
     border-radius: var(--radius-xl);
-    padding: 1.5rem;
+    max-height: 84vh;
     animation: scaleIn 0.18s ease-out;
   }
 }
@@ -266,6 +285,51 @@ function onSubmit() {
 @keyframes scaleIn {
   from { transform: scale(0.96); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+.modal-sheet-header {
+  padding: 0.85rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .modal-sheet-header {
+    padding: 1.1rem 1.5rem 0.85rem;
+  }
+}
+
+.modal-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.15rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 640px) {
+  .modal-sheet-body {
+    padding: 1.25rem 1.5rem 1.75rem;
+  }
+}
+
+.modal-sheet-footer {
+  padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-light);
+  background: var(--surface);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .modal-sheet-footer {
+    padding: 1rem 1.5rem;
+  }
 }
 
 .sheet-handle-bar {
@@ -442,18 +506,16 @@ function onSubmit() {
 /* Category Grid */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 0.4rem;
-  max-height: 180px;
-  overflow-y: auto;
-  padding: 0.2rem 0.1rem;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 0.45rem;
+  padding: 0.1rem 0;
 }
 
 .cat-chip {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.5rem 0.65rem;
+  padding: 0.5rem 0.6rem;
   border: 1px solid var(--border);
   background: var(--surface-warm);
   border-radius: var(--radius-md);
@@ -462,6 +524,7 @@ function onSubmit() {
   font-weight: 500;
   cursor: pointer;
   text-align: left;
+  min-width: 0;
   transition: all 0.12s ease;
 }
 
@@ -489,8 +552,6 @@ function onSubmit() {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  max-height: 120px;
-  overflow-y: auto;
   padding: 0.1rem 0;
 }
 
@@ -518,17 +579,25 @@ function onSubmit() {
   font-weight: 600;
 }
 
-/* Actions */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.65rem;
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-light);
-}
-
 .submit-btn {
   padding: 0.65rem 1.4rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface-warm);
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.text-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(223, 104, 38, 0.12);
+  background: #ffffff;
 }
 </style>
