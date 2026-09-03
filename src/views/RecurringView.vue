@@ -309,7 +309,7 @@ function getFrequencyLabel(item: RecurringItem): string {
 
     <!-- Empty State -->
     <div v-else class="card empty-recurring-wrap">
-      <CatMascot :size="140" variant="sleeping" />
+      <CatMascot :size="162" variant="sleeping" />
       <p class="empty-text">{{ t('emptyRecurring', locale) }}</p>
       <button type="button" class="btn-primary" @click="openAddModal">
         <AppIcon name="plus" :size="16" stroke-width="2.5" />

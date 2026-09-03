@@ -163,7 +163,7 @@ A warm, comforting personal finance design system directly inspired by a sleepin
 
 ## Components
 
-- **Cat Mascot:** Authored SVG illustration of a sleeping ginger-and-white tabby cat used in avatars and zero-state illustrations.
+- **Cat Mascot:** Dứa Con drawn as pixel art — a 16x16 face for the brand avatar and favicon, and a 54x37 sleeping sprawl for zero states, both authored as character maps in `src/components/mascotSprites.ts` and rendered as whole-pixel SVG rects. `CatMascot` snaps its render down to a whole multiple of the sprite grid, so the art never lands on a half pixel; the browser icons are generated from the same maps by `yarn icons`. The palette is a fixed twelve shades (espresso outline, four gingers, three creams, nose pink, ear pink, eyelid, cushion). Only the sleep marks animate, a pixel at a time.
 - **AppIcon:** Consistent stroke SVG icon system (24x24, 2px stroke, round caps) replacing all emojis.
 - **Visual Category Picker:** Tactile category icon chips with interactive subcategory pill rows.
 - **Multi-Currency Card:** Clean balance presentation with Dinero.js BigInt precision.

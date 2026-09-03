@@ -24,7 +24,7 @@ const store = useExpenseStore()
   <aside class="desktop-sidebar">
     <!-- Brand Header -->
     <div class="sidebar-brand">
-      <CatMascot :size="42" variant="avatar" />
+      <CatMascot :size="48" variant="avatar" />
       <div class="brand-info">
         <h2 class="sidebar-title">{{ t('appTitle', locale) }}</h2>
         <span class="sidebar-subtitle">{{ t('appSubtitle', locale) }}</span>

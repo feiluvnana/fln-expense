@@ -18,7 +18,7 @@ const emit = defineEmits<{
 <template>
   <header class="mobile-header">
     <div class="header-brand">
-      <CatMascot :size="34" variant="avatar" />
+      <CatMascot :size="32" variant="avatar" />
       <div class="brand-text">
         <h1 class="brand-title">{{ t('appTitle', locale) }}</h1>
       </div>

@@ -271,7 +271,7 @@ function onOverviewScroll() {
 
       <!-- Empty State with Sleeping Cat Mascot -->
       <div v-if="!store.recentTransactions.length" class="empty-state-wrap">
-        <CatMascot :size="140" variant="sleeping" />
+        <CatMascot :size="162" variant="sleeping" />
         <p class="empty-text">{{ t('emptyState', locale) }}</p>
         <div class="empty-actions">
           <button type="button" class="btn-primary" @click="emit('open-add-modal')">

@@ -112,7 +112,7 @@ const groupedTransactions = computed(() => {
 
     <!-- Empty State -->
     <div v-if="!groupedTransactions.length" class="card empty-state-card">
-      <CatMascot :size="140" variant="sleeping" />
+      <CatMascot :size="162" variant="sleeping" />
       <p class="empty-msg">
         {{ searchQuery || filterType !== 'all' ? t('emptyFilter', locale) : t('emptyState', locale) }}
       </p>
