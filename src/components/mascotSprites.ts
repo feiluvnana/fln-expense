@@ -21,15 +21,15 @@ export const MASCOT_ARTWORK: Record<MascotVariant, MascotArtwork> = {
   avatar: {
     webp: avatarWebp,
     png: avatarPng,
-    width: 845,
-    height: 845,
+    width: 907,
+    height: 907,
     alt: 'Dứa Con',
   },
   sleeping: {
     webp: sleepingWebp,
     png: sleepingPng,
-    width: 1025,
-    height: 612,
+    width: 1145,
+    height: 603,
     alt: 'Dứa Con đang ngủ say',
   },
 }

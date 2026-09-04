@@ -15,13 +15,13 @@ def main():
     
     avatar = Image.open(SRC_AVATAR).convert('RGBA')
     
-    # 1. Apple Touch Icon: 180x180
+    # 1. Apple Icon: 180x180
     touch = Image.new('RGBA', (180, 180), GROUND)
     avatar_touch = avatar.resize((156, 156), Image.Resampling.LANCZOS)
     touch.paste(avatar_touch, (12, 12), avatar_touch)
-    touch_path = os.path.join(PUBLIC_DIR, 'apple-touch-icon.png')
+    touch_path = os.path.join(PUBLIC_DIR, 'apple-icon.png')
     touch.save(touch_path, optimize=True)
-    print(f"public/apple-touch-icon.png ({os.path.getsize(touch_path):,} bytes)")
+    print(f"public/apple-icon.png ({os.path.getsize(touch_path):,} bytes)")
 
     # 2. Favicon ICO: 16x16, 32x32, 48x48
     ico_frames = []
