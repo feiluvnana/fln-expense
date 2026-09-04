@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
-  MASCOT_SPRITES,
-  SLEEP_MARKS,
-  spriteRuns,
+  MASCOT_ARTWORK,
   type MascotVariant,
 } from '@/components/mascotSprites'
 
 const props = withDefaults(
   defineProps<{
-    /** Width budget in px. The render snaps down to a whole multiple of the sprite grid. */
+    /** Size budget in px (width, aspect ratio is preserved). */
     size?: number
     variant?: MascotVariant
     /** Set to announce the mascot; left empty it stays decorative. */
@@ -22,107 +20,151 @@ const props = withDefaults(
   },
 )
 
-const sprite = computed(() => MASCOT_SPRITES[props.variant])
+const artwork = computed(() => MASCOT_ARTWORK[props.variant])
 
-// Pixel art earns its crispness from whole pixels: a 16-wide sprite asked for
-// 34px renders at 32, not at 2.125 units per cell.
-const scale = computed(() => Math.max(1, Math.floor(props.size / sprite.value.w)))
-const width = computed(() => sprite.value.w * scale.value)
-const height = computed(() => sprite.value.h * scale.value)
-
-const runs = computed(() => spriteRuns(sprite.value))
-
-const sleepMarks = computed(() => {
-  if (props.variant !== 'sleeping') return []
-  return SLEEP_MARKS.map((mark) => ({
-    delay: mark.delay,
-    runs: spriteRuns(mark.sprite).map((run) => ({
-      ...run,
-      x: run.x + mark.x,
-      y: run.y + mark.y,
-    })),
-  }))
-})
+const width = computed(() => props.size)
+const height = computed(() =>
+  Math.round(props.size * (artwork.value.height / artwork.value.width)),
+)
 </script>
 
 <template>
-  <svg
-    class="cat-mascot"
-    :width="width"
-    :height="height"
-    :viewBox="`0 0 ${sprite.w} ${sprite.h}`"
+  <div
+    class="cat-mascot-wrap"
+    :class="`variant-${variant}`"
+    :style="{ width: `${width}px`, height: `${height}px` }"
     :role="label ? 'img' : undefined"
     :aria-label="label || undefined"
     :aria-hidden="label ? undefined : 'true'"
-    xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      v-for="(run, i) in runs"
-      :key="i"
-      :x="run.x"
-      :y="run.y"
-      :width="run.w"
-      height="1"
-      :fill="run.fill"
-    />
-    <g
-      v-for="(mark, m) in sleepMarks"
-      :key="`zzz-${m}`"
-      class="cat-mascot-zzz"
-      :style="{ animationDelay: mark.delay }"
-    >
-      <rect
-        v-for="(run, i) in mark.runs"
-        :key="i"
-        :x="run.x"
-        :y="run.y"
-        :width="run.w"
-        height="1"
-        :fill="run.fill"
+    <picture class="cat-mascot-picture">
+      <source :srcset="artwork.webp" type="image/webp" />
+      <img
+        :src="artwork.png"
+        :alt="label || artwork.alt"
+        :width="width"
+        :height="height"
+        class="cat-mascot-img"
+        loading="lazy"
+        draggable="false"
       />
-    </g>
-  </svg>
+    </picture>
+
+    <!-- Floating animated sleep marks for the sleeping variant -->
+    <div v-if="variant === 'sleeping'" class="cat-mascot-zzz-layer" aria-hidden="true">
+      <span class="cat-zzz zzz-1">z</span>
+      <span class="cat-zzz zzz-2">z</span>
+      <span class="cat-zzz zzz-3">Z</span>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.cat-mascot {
+.cat-mascot-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.cat-mascot-picture {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.cat-mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
-  shape-rendering: crispEdges;
+  image-rendering: auto;
 }
 
-/* One authored moment: the sleep marks rise a pixel at a time, the cat lies still. */
-.cat-mascot-zzz {
-  animation: cat-mascot-drift 4.2s steps(1, end) infinite;
+/* Subtle peaceful breathing when sleeping */
+.variant-sleeping .cat-mascot-img {
+  transform-origin: 50% 85%;
+  animation: cat-breathe 4s ease-in-out infinite;
 }
 
-@keyframes cat-mascot-drift {
+@keyframes cat-breathe {
   0%,
-  12% {
-    transform: translateY(2px);
-    opacity: 0;
-  }
-  24% {
-    transform: translateY(1px);
-    opacity: 1;
-  }
-  56% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  76% {
-    transform: translateY(-1px);
-    opacity: 0.5;
-  }
-  88%,
   100% {
-    transform: translateY(-2px);
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.02) translateY(-0.5px);
+  }
+}
+
+/* Floating animated Zzz layer */
+.cat-mascot-zzz-layer {
+  position: absolute;
+  top: -12%;
+  left: 12%;
+  width: 36%;
+  height: 40%;
+  pointer-events: none;
+}
+
+.cat-zzz {
+  position: absolute;
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-weight: 800;
+  color: var(--primary, #df6826);
+  opacity: 0;
+  text-shadow: 0 1px 2px rgba(223, 104, 38, 0.18);
+  animation: cat-zzz-float 3.6s ease-out infinite;
+}
+
+.zzz-1 {
+  font-size: 0.7rem;
+  bottom: 12%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.zzz-2 {
+  font-size: 0.85rem;
+  bottom: 38%;
+  left: 35%;
+  animation-delay: 1.2s;
+}
+
+.zzz-3 {
+  font-size: 1.05rem;
+  bottom: 64%;
+  left: 65%;
+  animation-delay: 2.4s;
+}
+
+@keyframes cat-zzz-float {
+  0% {
     opacity: 0;
+    transform: translate(0, 4px) scale(0.85);
+  }
+  20% {
+    opacity: 0.85;
+  }
+  55% {
+    opacity: 0.75;
+    transform: translate(3px, -6px) scale(1.02);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: translate(6px, -14px) scale(1.15);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cat-mascot-zzz {
+  .variant-sleeping .cat-mascot-img,
+  .cat-zzz {
     animation: none;
+    opacity: 0.7;
+    transform: none;
   }
 }
 </style>
