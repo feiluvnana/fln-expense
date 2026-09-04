@@ -67,6 +67,7 @@ export const useExpenseStore = defineStore('expenses', () => {
   }
 
   function loadSampleData(sampleTxs: Transaction[]) {
+    if (!import.meta.env.DEV) return
     importTransactions(sampleTxs, 'replace')
   }
 

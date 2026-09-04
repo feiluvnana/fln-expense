@@ -123,7 +123,7 @@ modal form, and the sample data in [`sampleData.ts`](../../../src/utils/sampleDa
 
 - Transactions live under LocalStorage; loading is via `loadStoredTransactions()`, writing via
   `persistTransactions(list)`. Every store mutation calls `persist()` — keep that invariant.
-- First run seeds from `getInitialSeedData()`.
+- Sample data and recurring defaults are only available/seeded in dev environment (`import.meta.env.DEV`).
 - [`DataManagementModal.vue`](../../../src/components/DataManagementModal.vue) handles JSON export, import
   (`'replace' | 'merge'` — merge de-duplicates by `id`), sample-data loading, and clear-all.
 - Sample data: [`src/utils/sampleData.ts`](../../../src/utils/sampleData.ts) (`RAW_SAMPLE_DATA`,

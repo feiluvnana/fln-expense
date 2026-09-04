@@ -23,6 +23,7 @@ const emit = defineEmits<{
 
 const store = useExpenseStore()
 const recurringStore = useRecurringStore()
+const isDev = import.meta.env.DEV
 const activeMobileCurrencyIndex = ref(0)
 const overviewContainerRef = ref<HTMLElement | null>(null)
 const upcomingContainerRef = ref<HTMLElement | null>(null)
@@ -278,7 +279,12 @@ function onOverviewScroll() {
             <AppIcon name="plus" :size="16" stroke-width="2.5" />
             <span>{{ t('addTx', locale) }}</span>
           </button>
-          <button type="button" class="btn-secondary" @click="emit('open-data-modal')">
+          <button
+            v-if="isDev"
+            type="button"
+            class="btn-secondary"
+            @click="emit('open-data-modal')"
+          >
             <AppIcon name="database" :size="16" stroke-width="2.2" />
             <span>{{ t('loadSampleData', locale) }}</span>
           </button>

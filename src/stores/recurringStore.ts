@@ -132,7 +132,7 @@ function getInitialDefaultRecurring(): RecurringItem[] {
 function loadStoredRecurring(): RecurringItem[] {
   try {
     const raw = localStorage.getItem(RECURRING_STORAGE_KEY)
-    if (raw === null) return getInitialDefaultRecurring()
+    if (raw === null) return import.meta.env.DEV ? getInitialDefaultRecurring() : []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed.map(deserializeRecurringItem).filter((x): x is RecurringItem => x !== null)
@@ -301,6 +301,7 @@ export const useRecurringStore = defineStore('recurring', () => {
   }
 
   function loadSampleData(sampleItems: RecurringItem[]) {
+    if (!import.meta.env.DEV) return
     importRecurring(sampleItems, 'replace')
   }
 

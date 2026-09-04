@@ -20,6 +20,7 @@ const emit = defineEmits<{
 
 const store = useExpenseStore()
 const recurringStore = useRecurringStore()
+const isDev = import.meta.env.DEV
 
 const importMode = ref<'replace' | 'merge'>('replace')
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -61,6 +62,7 @@ function handleExport(locale: Locale) {
 }
 
 function handleLoadSample(locale: Locale) {
+  if (!isDev) return
   const sampleTxs = getSampleTransactions()
   const sampleRec = getSampleRecurring()
   store.loadSampleData(sampleTxs)
@@ -163,8 +165,8 @@ function handleClear(locale: Locale) {
 
         <!-- Content Sections -->
         <div class="management-sections">
-        <!-- 1. Load Sample Data Card -->
-        <div class="data-card sample-card">
+        <!-- 1. Load Sample Data Card (Dev only) -->
+        <div v-if="isDev" class="data-card sample-card">
           <div class="data-card-info">
             <div class="card-label-row">
               <AppIcon name="cat" :size="17" stroke-width="2" />
